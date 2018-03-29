@@ -50,9 +50,9 @@ def get_salary(value):
 def get_experience(value): #获取经验年限
     x = re.findall(r'(?:\d+)+',value)
     if x:
-        minsalary = int(x[0])
-        maxsalary = int(x[1])
-        return minsalary,maxsalary
+        minyear = int(x[0])
+        maxyear = int(x[1])
+        return minyear,maxyear
     else:
         return 0,0
 
