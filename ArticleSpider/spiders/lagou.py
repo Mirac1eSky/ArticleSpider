@@ -7,7 +7,7 @@ from ArticleSpider.items import LagouJobItem,LagouJobItemLoader
 from ArticleSpider.utils.common import get_md5
 from scrapy_redis.spiders import RedisSpider
 
-class LagouSpider(CrawlSpider,RedisSpider):
+class LagouSpider(CrawlSpider):
     name = 'lagou'
     allowed_domains = ['www.lagou.com']
     #redis_key = "lagou:start_urls"
