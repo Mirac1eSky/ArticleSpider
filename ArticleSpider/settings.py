@@ -76,8 +76,8 @@ ITEM_PIPELINES = {
     #'ArticleSpider.pipelines.JsonwithEncodingPipeline':2,
    #'ArticleSpider.pipelines.JsonExporterPipleline':1
     #'ArticleSpider.pipelines.MysqlPipeline':1
-   'ArticleSpider.pipelines.MysqlTwistedPipeline':3,
-   # 'ArticleSpider.pipelines.ElasticSearchPipeline':1,
+   #'ArticleSpider.pipelines.MysqlTwistedPipeline':3,
+    'ArticleSpider.pipelines.ElasticSearchPipeline':1,
    # 'scrapy_redis.pipelines.RedisPipeline': 300
 }
 IMAGES_URLS_FIELD = "front_image_url"
