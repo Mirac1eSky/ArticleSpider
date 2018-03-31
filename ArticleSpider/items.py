@@ -18,8 +18,9 @@ from ArticleSpider.utils.common import get_salary,get_experience,handle_data
 from ArticleSpider.models.es_models import Lagou
 
 from elasticsearch_dsl.connections import connections
+import redis
 es = connections.create_connection(Lagou._doc_type.using)
-
+redis_cli = redis.StrictRedis()
 
 
 def gen_suggests(index,info_tuple):
@@ -315,4 +316,5 @@ class LagouJobItem(scrapy.Item):
         lagou.suggest = gen_suggests(Lagou._doc_type.index,((lagou.title,10),(lagou.tags,7)))
 
         #lagou.suggest = [{"input":[],"weight":2}]
+        redis_cli.incr("lagou_count")
         lagou.save()
