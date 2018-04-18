@@ -7,11 +7,17 @@ from ArticleSpider.items import LagouJobItem,LagouJobItemLoader
 from ArticleSpider.utils.common import get_md5
 from scrapy_redis.spiders import RedisSpider
 
-class LagouSpider(CrawlSpider):
+
+
+class LagouSpider(CrawlSpider,RedisSpider):
+
+    def __init__(self, *args, **kwargs):
+        super(LagouSpider, self).__init__(*args, **kwargs)  # 这里是关键
+
     name = 'lagou'
     allowed_domains = ['www.lagou.com']
-    #redis_key = "lagou:start_urls"
-    start_urls = ['http://www.lagou.com/']
+    redis_key = "lagou:start_urls"
+    #start_urls = ['http://www.lagou.com/']
     agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
 
     header = {
@@ -20,6 +26,7 @@ class LagouSpider(CrawlSpider):
         "User-Agent":agent,
 
     }
+
     custom_settings = {
         "COOKIES_ENABLED": False,
         "DOWNLOAD_DELAY": 2,
