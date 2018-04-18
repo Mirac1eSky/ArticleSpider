@@ -39,8 +39,14 @@ def extract_nums(text):
 def get_salary(value):
     x = re.findall(r'(?:\d+)+',value)
     if x:
-        minsalary = int(x[0])*1000
-        maxsalary = int(x[1])*1000
+        if (len(x)==2):
+            minsalary = int(x[0])*1000
+            maxsalary = int(x[1])*1000
+        else:
+            minsalary = int(x[0])*1000
+            maxsalary = 99999999
+            print("薪资："+value)
+
         return minsalary,maxsalary
     else:
 
@@ -50,11 +56,17 @@ def get_salary(value):
 def get_experience(value): #获取经验年限
     x = re.findall(r'(?:\d+)+',value)
     if x:
-        minyear = int(x[0])
-        maxyear = int(x[1])
+        if(len(x)==2):
+            minyear = int(x[0])
+            maxyear = int(x[1])
+        else:
+            minyear = int(x[0])
+            maxyear = 99999999
+            print("经验："+value)
         return minyear,maxyear
     else:
         return 0,0
+
 
 
 def handle_data(value):
@@ -66,7 +78,7 @@ def handle_data(value):
     match2 = re.match(r"^\d+-\d+-\d+",value)
     if match:
         current_day = string.day  # 获取当前日期的天
-        print(current_day)
+        #print("currrent_day:"+current_day)
         day = match.group()
         d = re.match(r"^\d+", day)
         print(d.group())
@@ -83,4 +95,4 @@ def handle_data(value):
         return 0
 
 if __name__ == "__main__":
-    print(handle_data("2018-01-01  发布于拉勾网"))
+    print(get_salary("5k-9k"))
