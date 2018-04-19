@@ -1,15 +1,8 @@
 import datetime
 import scrapy
 import re
-from scrapy.http import Request, response
-from urllib import parse
-from ArticleSpider.utils.common import get_md5
-from ArticleSpider.items import JobBoleArticleItem, ArticleItemLoader
-from ArticleSpider.utils.common import dateconvert
-from scrapy.loader import ItemLoader
-from selenium import webdriver
-from scrapy.xlib.pydispatch import dispatcher
-from scrapy import signals
+from ArticleSpider.items import QiushiItem,QiushiItemLoader
+
 
 
 class QiubaiSpider(scrapy.Spider):
@@ -39,24 +32,45 @@ class QiubaiSpider(scrapy.Spider):
             a.append(p.sub(' ', t))
         return a
 
-
+    def clear_h2_br(self, txt):
+        p = re.compile(r'((<h2>)|(</h2>)|(<br>))+')
+        a = []
+        for t in txt:
+            a.append(p.sub(' ', t))
+        return a
 
 
     def parse(self, response):
-        f = open('qiushibaike.txt', 'a')
+        item_loader = QiushiItemLoader(item=QiushiItem(), response=response)
         page_url = response.selector.xpath('//ul[@class="pagination"]/li/a/@href').extract()
-        author = response.selector.xpath('//div[@id="content-left"]/div/div[1]/a[2]/@title').extract()
+        author = response.selector.xpath('//div[@id="content-left"]/div/div[1]/a[2]/h2').extract()
         content = response.selector.xpath('//div[@class="content"]/span').extract()
         content = self.clear_span_br(content)
+        author = self.clear_h2_br(author)
         pag_url = page_url[-1]
+        # print(author)
+        # print(">>>>>>>>>>>>>>>>>>>")
+        # print(content)
+        if author:
+            pass
+        else:
+            author = []
+            author.append("niming")
+        # with open('qiushibaike.txt', 'a') as f:
+        #     while (author and content):
+        #         a = author.pop()
+        #         c = content.pop()
+        #         print(a)
+        #         print("--------------")
+        #         print(c)
+        #         f.write('author:' + a + '\n' + 'content:' + c + '\n')
         while (author and content):
-            a = author.pop()
-            c = content.pop()
-            f.write('author:' + a + '\n' + 'content:' + c + '\n')
-        f.close()
-
+            item_loader.add_value("author",author.pop())
+            item_loader.add_value("content",content.pop())
+            job_item = item_loader.load_item()
+        yield job_item
         '''返回获取到的下一页的连接'''
-        yield scrapy.Request("https://www.qiushibaike.com"+pag_url, callback=self.parse)
+        yield scrapy.Request("https://www.qiushibaike.com"+pag_url, callback=self.parse,dont_filter=True)
 
 
 

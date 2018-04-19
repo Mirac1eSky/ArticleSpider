@@ -232,6 +232,8 @@ class LagouJobItemLoader(ItemLoader):
     default_output_processor = TakeFirst()
 
 
+
+
 class LagouJobItem(scrapy.Item):
     #拉勾网职位
     title = scrapy.Field()
@@ -318,3 +320,18 @@ class LagouJobItem(scrapy.Item):
         #lagou.suggest = [{"input":[],"weight":2}]
         redis_cli.incr("lagou_count")
         lagou.save()
+
+class QiushiItemLoader(ItemLoader):
+    default_output_processor = TakeFirst()
+
+class QiushiItem(scrapy.Item):
+    author = scrapy.Field()
+    content = scrapy.Field()
+
+    def get_insert_sql(self):
+        insert_sql = """
+                   insert into qiushi(author,content)
+                   VALUES (%s,%s)
+               """
+        params = (self["author"],self["content"])
+        return insert_sql, params
