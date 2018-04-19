@@ -68,6 +68,7 @@ class QiubaiSpider(scrapy.Spider):
             item_loader.add_value("author",author.pop())
             item_loader.add_value("content",content.pop())
             job_item = item_loader.load_item()
+
         yield job_item
         '''返回获取到的下一页的连接'''
         yield scrapy.Request("https://www.qiushibaike.com"+pag_url, callback=self.parse,dont_filter=True)

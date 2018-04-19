@@ -325,8 +325,10 @@ class QiushiItemLoader(ItemLoader):
     default_output_processor = TakeFirst()
 
 class QiushiItem(scrapy.Item):
+
     author = scrapy.Field()
     content = scrapy.Field()
+
 
     def get_insert_sql(self):
         insert_sql = """
