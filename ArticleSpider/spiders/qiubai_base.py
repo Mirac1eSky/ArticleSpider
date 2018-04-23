@@ -46,7 +46,7 @@ class QiubaiSpider(scrapy.Spider):
         url = response.selector.xpath('//a[@class="contentHerf"]/@href').extract()
         fav_nums = response.selector.xpath('//div[@class="stats"]/span[1]/i/text()').extract()
         page_url = response.selector.xpath('//ul[@class="pagination"]/li[last()]/a/@href').extract()
-        author = response.selector.xpath('//div[@id="content-left"]/div/div[1]/a[2]/h2').extract()
+        author = response.selector.xpath('//div[@id="content-left"]/div/div[1]/a[2]/h2 | //div[@id="content-left"]/div/div[1]/span[2]/h2 ').extract()
         content = response.selector.xpath('//div[@class="content"]/span[1]').extract()
         content = self.clear_span_br(content)
         author = self.clear_h2_br(author)
@@ -77,6 +77,16 @@ class QiubaiSpider(scrapy.Spider):
                 job_item = item_loader.load_item()
 
             yield job_item
+        else:
+            print("**************************")
+            print(len(author))
+            print("\n")
+            print(len(content))
+            print("\n")
+            print(len(url))
+            print("\n")
+            print(len(fav_nums))
+            print("--------------------------")
         '''返回获取到的下一页的连接'''
         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
         print(page_url)
