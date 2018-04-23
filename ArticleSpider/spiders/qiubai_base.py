@@ -2,7 +2,7 @@ import datetime
 import scrapy
 import re
 from ArticleSpider.items import QiushiItem,QiushiItemLoader
-
+from urllib import parse
 
 
 class QiubaiSpider(scrapy.Spider):
@@ -42,12 +42,15 @@ class QiubaiSpider(scrapy.Spider):
 
     def parse(self, response):
         item_loader = QiushiItemLoader(item=QiushiItem(), response=response)
-        page_url = response.selector.xpath('//ul[@class="pagination"]/li/a/@href').extract()
+        user_url = response.selector.xpath('//div[@class="author clearfix"]/a/@href').extract()
+        url = response.selector.xpath('//a[@class="contentHerf"]/@href').extract()
+        fav_nums = response.selector.xpath('//div[@class="stats"]/span[1]/i/text()').extract()
+        page_url = response.selector.xpath('//ul[@class="pagination"]/li[last()]/a/@href').extract()
         author = response.selector.xpath('//div[@id="content-left"]/div/div[1]/a[2]/h2').extract()
-        content = response.selector.xpath('//div[@class="content"]/span').extract()
+        content = response.selector.xpath('//div[@class="content"]/span[1]').extract()
         content = self.clear_span_br(content)
         author = self.clear_h2_br(author)
-        pag_url = page_url[-1]
+        page_url = page_url.pop()
         # print(author)
         # print(">>>>>>>>>>>>>>>>>>>")
         # print(content)
@@ -64,14 +67,20 @@ class QiubaiSpider(scrapy.Spider):
         #         print("--------------")
         #         print(c)
         #         f.write('author:' + a + '\n' + 'content:' + c + '\n')
-        while (author and content):
-            item_loader.add_value("author",author.pop())
-            item_loader.add_value("content",content.pop())
-            job_item = item_loader.load_item()
+        if (len(author) == len(content) and len(author) == len(url) and len(author) == len(fav_nums)):
+            while (author and content and url and fav_nums):
+                item_loader.add_value("author",author.pop())
+                item_loader.add_value("content",content.pop())
+                #item_loader.add_value("url",url.pop())
+                item_loader.add_value("fav_nums",fav_nums.pop())
+                item_loader.add_value("url",parse.urljoin(response.url,url.pop()))
+                job_item = item_loader.load_item()
 
-        yield job_item
+            yield job_item
         '''返回获取到的下一页的连接'''
-        yield scrapy.Request("https://www.qiushibaike.com"+pag_url, callback=self.parse,dont_filter=True)
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        print(page_url)
+        yield scrapy.Request("https://www.qiushibaike.com"+page_url, callback=self.parse,dont_filter=True)
 
 
 

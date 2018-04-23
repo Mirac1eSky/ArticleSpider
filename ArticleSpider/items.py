@@ -328,12 +328,18 @@ class QiushiItem(scrapy.Item):
 
     author = scrapy.Field()
     content = scrapy.Field()
-
-
+    url = scrapy.Field()
+    fav_nums = scrapy.Field()
     def get_insert_sql(self):
         insert_sql = """
-                   insert into qiushi(author,content)
-                   VALUES (%s,%s)
+                   insert into qiushi(author,content,fav_nums,url)
+                   VALUES (%s,%s,%s,%s)
                """
-        params = (self["author"],self["content"])
+        params = (self["author"],self["content"],self["fav_nums"],self["url"])
         return insert_sql, params
+
+    def save_to_es(self):
+        author = self['author']
+        fav_nums = self['fav_nums']
+        content = self['content']
+        url = self['url']
