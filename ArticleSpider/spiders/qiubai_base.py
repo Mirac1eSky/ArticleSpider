@@ -3,6 +3,7 @@ import scrapy
 import re
 from ArticleSpider.items import QiushiItem,QiushiItemLoader
 from urllib import parse
+from scrapy.http import Request
 
 
 class QiubaiSpider(scrapy.Spider):
@@ -39,18 +40,30 @@ class QiubaiSpider(scrapy.Spider):
             a.append(p.sub(' ', t))
         return a
 
+    def static_vars(**kwargs):
+        def decorate(func):
+            for k in kwargs:
+                setattr(func, k, kwargs[k])
+            return func
 
+        return decorate
+    @static_vars(page_url_exist=[])
     def parse(self, response):
         item_loader = QiushiItemLoader(item=QiushiItem(), response=response)
         user_url = response.selector.xpath('//div[@class="author clearfix"]/a/@href').extract()
         url = response.selector.xpath('//a[@class="contentHerf"]/@href').extract()
         fav_nums = response.selector.xpath('//div[@class="stats"]/span[1]/i/text()').extract()
         page_url = response.selector.xpath('//ul[@class="pagination"]/li[last()]/a/@href').extract()
+        page_url = page_url.pop()
+        complete_url = parse.urljoin(response.url,page_url)
         author = response.selector.xpath('//div[@id="content-left"]/div/div[1]/a[2]/h2 | //div[@id="content-left"]/div/div[1]/span[2]/h2 ').extract()
         content = response.selector.xpath('//div[@class="content"]/span[1]').extract()
         content = self.clear_span_br(content)
         author = self.clear_h2_br(author)
-        page_url = page_url.pop()
+
+        #去重
+
+
         # print(author)
         # print(">>>>>>>>>>>>>>>>>>>")
         # print(content)
@@ -67,31 +80,46 @@ class QiubaiSpider(scrapy.Spider):
         #         print("--------------")
         #         print(c)
         #         f.write('author:' + a + '\n' + 'content:' + c + '\n')
-        if (len(author) == len(content) and len(author) == len(url) and len(author) == len(fav_nums)):
-            while (author and content and url and fav_nums):
-                item_loader.add_value("author",author.pop())
-                item_loader.add_value("content",content.pop())
-                #item_loader.add_value("url",url.pop())
-                item_loader.add_value("fav_nums",fav_nums.pop())
-                item_loader.add_value("url",parse.urljoin(response.url,url.pop()))
-                job_item = item_loader.load_item()
 
-            yield job_item
+        if complete_url not in parse.page_url_exist:
+            parse.page_url_exist.append(complete_url)
+            for x in parse.page_url_exist:
+                print("--------------------------")
+                print(len(parse.page_url_exist))
+                print(complete_url)
+                print("--------------------------")
+            if (len(author) == len(content) and len(author) == len(url) and len(author) == len(fav_nums)):
+
+                while (author and content and url and fav_nums):
+                    item_loader = QiushiItemLoader(item=QiushiItem(), response=response)
+                    item_loader.add_value("author",author.pop())
+                    item_loader.add_value("content",content.pop())
+                    #item_loader.add_value("url",url.pop())
+                    item_loader.add_value("fav_nums",fav_nums.pop())
+                    item_loader.add_value("url",parse.urljoin(response.url,url.pop()))
+                    job_item = item_loader.load_item()
+
+                    yield job_item
+            else:
+                print("**************************")
+                print(len(author))
+                print("\n")
+                print(len(content))
+                print("\n")
+                print(len(url))
+                print("\n")
+                print(len(fav_nums))
+                print("--------------------------")
+            '''返回获取到的下一页的连接'''
+            #print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            #print(complete_url)
+            if page_url:
+                yield Request(url=complete_url, callback=self.parse,dont_filter=True)
+
         else:
-            print("**************************")
-            print(len(author))
-            print("\n")
-            print(len(content))
-            print("\n")
-            print(len(url))
-            print("\n")
-            print(len(fav_nums))
-            print("--------------------------")
-        '''返回获取到的下一页的连接'''
-        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-        print(page_url)
-        yield scrapy.Request("https://www.qiushibaike.com"+page_url, callback=self.parse,dont_filter=True)
-
-
+            print("<<<<<<<<<<<<<<<<<<<")
+            print("end")
+            print(">>>>>>>>>>>>>>>>>>>")
+            return
 
 
